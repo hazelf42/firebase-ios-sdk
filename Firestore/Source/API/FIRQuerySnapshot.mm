@@ -16,6 +16,9 @@
 
 #import "Firestore/Source/API/FIRQuerySnapshot+Internal.h"
 
+#include <memory>
+#include <utility>
+
 #import "FIRFirestore.h"
 #import "FIRSnapshotMetadata.h"
 #import "Firestore/Source/API/FIRDocumentChange+Internal.h"
@@ -26,6 +29,11 @@
 #import "Firestore/Source/Model/FSTDocument.h"
 #import "Firestore/Source/Model/FSTDocumentSet.h"
 #import "Firestore/Source/Util/FSTUsageValidation.h"
+
+#include "Firestore/core/src/firebase/firestore/api/document_snapshot.h"
+#include "absl/memory/memory.h"
+
+using firebase::firestore::api::QueryDocumentSnapshot;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -129,13 +137,10 @@ NS_ASSUME_NONNULL_BEGIN
 
     NSMutableArray<FIRQueryDocumentSnapshot *> *result = [NSMutableArray array];
     for (FSTDocument *document in documentSet.documentEnumerator) {
-      [result
-          addObject:[FIRQueryDocumentSnapshot
-                        snapshotWithFirestore:firestore
-                                  documentKey:document.key
-                                     document:document
-                                    fromCache:fromCache
-                             hasPendingWrites:self.snapshot.mutatedKeys.contains(document.key)]];
+      auto apiResult =
+          absl::make_unique<QueryDocumentSnapshot>(firestore, document.key, document, fromCache,
+                                              self.snapshot.mutatedKeys.contains(document.key));
+      [result addObject:[FIRQueryDocumentSnapshot snapshotWithSnapshot:std::move(apiResult)]];
     }
 
     _documents = result;

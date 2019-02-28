@@ -37,6 +37,7 @@
 #import "Firestore/Source/Util/FSTAsyncQueryListener.h"
 #import "Firestore/Source/Util/FSTUsageValidation.h"
 
+#include "Firestore/core/src/firebase/firestore/api/document_snapshot.h"
 #include "Firestore/core/src/firebase/firestore/model/document_key.h"
 #include "Firestore/core/src/firebase/firestore/model/precondition.h"
 #include "Firestore/core/src/firebase/firestore/model/resource_path.h"
@@ -44,6 +45,7 @@
 #include "Firestore/core/src/firebase/firestore/util/string_apple.h"
 
 namespace util = firebase::firestore::util;
+using firebase::firestore::api::DocumentSnapshot;
 using firebase::firestore::core::ParsedSetData;
 using firebase::firestore::core::ParsedUpdateData;
 using firebase::firestore::model::DocumentKey;
@@ -276,11 +278,8 @@ NS_ASSUME_NONNULL_BEGIN
                                 ? snapshot.mutatedKeys.contains(key)
                                 : NO;  // We don't raise `hasPendingWrites` for deleted documents.
 
-    FIRDocumentSnapshot *result = [FIRDocumentSnapshot snapshotWithFirestore:firestore
-                                                                 documentKey:key
-                                                                    document:document
-                                                                   fromCache:snapshot.fromCache
-                                                            hasPendingWrites:hasPendingWrites];
+    auto apiResult = absl::make_unique<DocumentSnapshot>(firestore, key, document, snapshot.fromCache, hasPendingWrites);
+    FIRDocumentSnapshot *result = [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiResult)];
     listener(result, nil);
   };
 

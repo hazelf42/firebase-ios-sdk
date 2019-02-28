@@ -31,9 +31,12 @@
 #import "Firestore/Source/Model/FSTDocument.h"
 #import "Firestore/Source/Model/FSTDocumentSet.h"
 
+#include "Firestore/core/src/firebase/firestore/api/document_snapshot.h"
 #include "Firestore/core/src/firebase/firestore/util/string_apple.h"
+#include "absl/memory/memory.h"
 
 namespace util = firebase::firestore::util;
+using firebase::firestore::api::QueryDocumentSnapshot;
 using firebase::firestore::core::DocumentViewChange;
 using firebase::firestore::model::DocumentKeySet;
 
@@ -108,16 +111,12 @@ NS_ASSUME_NONNULL_BEGIN
                                                               snapshot:viewSnapshot
                                                               metadata:metadata];
 
-  FIRQueryDocumentSnapshot *doc1Snap = [FIRQueryDocumentSnapshot snapshotWithFirestore:firestore
-                                                                           documentKey:doc1New.key
-                                                                              document:doc1New
-                                                                             fromCache:NO
-                                                                      hasPendingWrites:NO];
-  FIRQueryDocumentSnapshot *doc2Snap = [FIRQueryDocumentSnapshot snapshotWithFirestore:firestore
-                                                                           documentKey:doc2New.key
-                                                                              document:doc2New
-                                                                             fromCache:NO
-                                                                      hasPendingWrites:NO];
+  auto apiDoc1Snap =
+      absl::make_unique<QueryDocumentSnapshot>(firestore, doc1New.key, doc1New, false, false);
+  FIRQueryDocumentSnapshot *doc1Snap = [FIRQueryDocumentSnapshot snapshotWithSnapshot:std::move(apiDoc1Snap)];
+  auto apiDoc2Snap =
+      absl::make_unique<QueryDocumentSnapshot>(firestore, doc2New.key, doc2New, false, false);
+  FIRQueryDocumentSnapshot *doc2Snap = [FIRQueryDocumentSnapshot snapshotWithSnapshot:std::move(apiDoc2Snap)];
 
   NSArray<FIRDocumentChange *> *changesWithoutMetadata = @[
     [[FIRDocumentChange alloc] initWithType:FIRDocumentChangeTypeModified

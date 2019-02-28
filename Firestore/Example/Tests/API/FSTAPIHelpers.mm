@@ -35,12 +35,16 @@
 #import "Firestore/Source/Model/FSTDocument.h"
 #import "Firestore/Source/Model/FSTDocumentSet.h"
 
+#include "Firestore/core/src/firebase/firestore/api/document_snapshot.h"
 #include "Firestore/core/src/firebase/firestore/core/view_snapshot.h"
 #include "Firestore/core/src/firebase/firestore/util/string_apple.h"
 #include "Firestore/core/test/firebase/firestore/testutil/testutil.h"
+#include "absl/memory/memory.h"
 
 namespace testutil = firebase::firestore::testutil;
 namespace util = firebase::firestore::util;
+using firebase::firestore::api::DocumentSnapshot;
+using firebase::firestore::api::QueryDocumentSnapshot;
 using firebase::firestore::core::DocumentViewChange;
 using firebase::firestore::model::DocumentKeySet;
 
@@ -73,11 +77,10 @@ FIRDocumentSnapshot *FSTTestDocSnapshot(const absl::string_view path,
       data ? FSTTestDoc(path, version, data,
                         hasMutations ? FSTDocumentStateLocalMutations : FSTDocumentStateSynced)
            : nil;
-  return [FIRDocumentSnapshot snapshotWithFirestore:FSTTestFirestore()
-                                        documentKey:testutil::Key(path)
-                                           document:doc
-                                          fromCache:fromCache
-                                   hasPendingWrites:hasMutations];
+  auto apiResult =
+      absl::make_unique<DocumentSnapshot>(FSTTestFirestore(), testutil::Key(path), doc, fromCache,
+                                          hasMutations);
+  return [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiResult)];
 }
 
 FIRCollectionReference *FSTTestCollectionRef(const absl::string_view path) {

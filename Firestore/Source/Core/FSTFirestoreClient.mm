@@ -42,6 +42,7 @@
 #import "Firestore/Source/Remote/FSTSerializerBeta.h"
 #import "Firestore/Source/Util/FSTClasses.h"
 
+#include "Firestore/core/src/firebase/firestore/api/document_snapshot.h"
 #include "Firestore/core/src/firebase/firestore/auth/credentials_provider.h"
 #include "Firestore/core/src/firebase/firestore/core/database_info.h"
 #include "Firestore/core/src/firebase/firestore/model/database_id.h"
@@ -54,6 +55,7 @@
 #include "absl/memory/memory.h"
 
 namespace util = firebase::firestore::util;
+using firebase::firestore::api::DocumentSnapshot;
 using firebase::firestore::auth::CredentialsProvider;
 using firebase::firestore::auth::User;
 using firebase::firestore::core::DatabaseInfo;
@@ -327,17 +329,12 @@ static const std::chrono::milliseconds FSTLruGcRegularDelay = std::chrono::minut
 
     if ([maybeDoc isKindOfClass:[FSTDocument class]]) {
       FSTDocument *document = (FSTDocument *)maybeDoc;
-      result = [FIRDocumentSnapshot snapshotWithFirestore:doc.firestore
-                                              documentKey:doc.key
-                                                 document:document
-                                                fromCache:YES
-                                         hasPendingWrites:document.hasLocalMutations];
+      auto apiResult = absl::make_unique<DocumentSnapshot>(doc.firestore, doc.key, document, true,
+                                                          document.hasLocalMutations);
+      result = [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiResult)];
     } else if ([maybeDoc isKindOfClass:[FSTDeletedDocument class]]) {
-      result = [FIRDocumentSnapshot snapshotWithFirestore:doc.firestore
-                                              documentKey:doc.key
-                                                 document:nil
-                                                fromCache:YES
-                                         hasPendingWrites:NO];
+      auto apiResult = absl::make_unique<DocumentSnapshot>(doc.firestore, doc.key, nil, true, false);
+      result = [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiResult)];
     } else {
       error = [NSError errorWithDomain:FIRFirestoreErrorDomain
                                   code:FIRFirestoreErrorCodeUnavailable

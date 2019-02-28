@@ -22,8 +22,11 @@
 #import "Firestore/Source/Model/FSTDocument.h"
 #import "Firestore/Source/Model/FSTDocumentSet.h"
 
+#include "Firestore/core/src/firebase/firestore/api/document_snapshot.h"
 #include "Firestore/core/src/firebase/firestore/util/hard_assert.h"
+#include "absl/memory/memory.h"
 
+using firebase::firestore::api::QueryDocumentSnapshot;
 using firebase::firestore::core::DocumentViewChange;
 
 NS_ASSUME_NONNULL_BEGIN
@@ -63,12 +66,11 @@ NS_ASSUME_NONNULL_BEGIN
     NSUInteger index = 0;
     NSMutableArray<FIRDocumentChange *> *changes = [NSMutableArray array];
     for (const DocumentViewChange &change : snapshot.documentChanges) {
-      FIRQueryDocumentSnapshot *document = [FIRQueryDocumentSnapshot
-          snapshotWithFirestore:firestore
-                    documentKey:change.document().key
-                       document:change.document()
-                      fromCache:snapshot.isFromCache
-               hasPendingWrites:snapshot.mutatedKeys.contains(change.document().key)];
+      auto apiDocument = absl::make_unique<QueryDocumentSnapshot>(
+          firestore, change.document().key, change.document(), snapshot.isFromCache,
+          snapshot.mutatedKeys.contains(change.document().key));
+      FIRQueryDocumentSnapshot *document =
+          [FIRQueryDocumentSnapshot snapshotWithSnapshot:std::move(apiDocument)];
       HARD_ASSERT(change.type() == DocumentViewChange::Type::kAdded,
                   "Invalid event type for first snapshot");
       HARD_ASSERT(!lastDocument || snapshot.query.comparator(lastDocument, change.document()) ==
@@ -90,12 +92,11 @@ NS_ASSUME_NONNULL_BEGIN
         continue;
       }
 
-      FIRQueryDocumentSnapshot *document = [FIRQueryDocumentSnapshot
-          snapshotWithFirestore:firestore
-                    documentKey:change.document().key
-                       document:change.document()
-                      fromCache:snapshot.isFromCache
-               hasPendingWrites:snapshot.mutatedKeys.contains(change.document().key)];
+      auto apiDocument = absl::make_unique<QueryDocumentSnapshot>(
+          firestore, change.document().key, change.document(), snapshot.isFromCache,
+          snapshot.mutatedKeys.contains(change.document().key));
+      FIRQueryDocumentSnapshot *document =
+          [FIRQueryDocumentSnapshot snapshotWithSnapshot:std::move(apiDocument)];
 
       NSUInteger oldIndex = NSNotFound;
       NSUInteger newIndex = NSNotFound;

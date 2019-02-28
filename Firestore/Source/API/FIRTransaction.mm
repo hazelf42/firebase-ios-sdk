@@ -28,11 +28,14 @@
 #import "Firestore/Source/Model/FSTDocument.h"
 #import "Firestore/Source/Util/FSTUsageValidation.h"
 
+#include "Firestore/core/src/firebase/firestore/api/document_snapshot.h"
 #include "Firestore/core/src/firebase/firestore/core/transaction.h"
 #include "Firestore/core/src/firebase/firestore/util/error_apple.h"
 #include "Firestore/core/src/firebase/firestore/util/hard_assert.h"
 #include "Firestore/core/src/firebase/firestore/util/status.h"
+#include "absl/memory/memory.h"
 
+using firebase::firestore::api::DocumentSnapshot;
 using firebase::firestore::core::ParsedSetData;
 using firebase::firestore::core::ParsedUpdateData;
 using firebase::firestore::core::Transaction;
@@ -127,19 +130,16 @@ NS_ASSUME_NONNULL_BEGIN
         HARD_ASSERT(documents.size() == 1, "Mismatch in docs returned from document lookup.");
         FSTMaybeDocument *internalDoc = documents.front();
         if ([internalDoc isKindOfClass:[FSTDeletedDocument class]]) {
-          FIRDocumentSnapshot *doc = [FIRDocumentSnapshot snapshotWithFirestore:self.firestore
-                                                                    documentKey:document.key
-                                                                       document:nil
-                                                                      fromCache:NO
-                                                               hasPendingWrites:NO];
+          auto apiDoc =
+              absl::make_unique<DocumentSnapshot>(self.firestore, document.key, nil, false, false);
+
+          FIRDocumentSnapshot *doc = [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiDoc)];
           completion(doc, nil);
         } else if ([internalDoc isKindOfClass:[FSTDocument class]]) {
-          FIRDocumentSnapshot *doc =
-              [FIRDocumentSnapshot snapshotWithFirestore:self.firestore
-                                             documentKey:internalDoc.key
-                                                document:(FSTDocument *)internalDoc
-                                               fromCache:NO
-                                        hasPendingWrites:NO];
+          auto apiDoc =
+              absl::make_unique<DocumentSnapshot>(self.firestore, internalDoc.key, static_cast<FSTDocument*>(internalDoc), false, false);
+
+          FIRDocumentSnapshot *doc = [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiDoc)];
           completion(doc, nil);
         } else {
           HARD_FAIL("BatchGetDocumentsRequest returned unexpected document type: %s",

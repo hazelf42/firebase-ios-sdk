@@ -16,6 +16,9 @@
 
 #import "FIRDocumentSnapshot.h"
 
+#include <memory>
+
+#include "Firestore/core/src/firebase/firestore/api/document_snapshot.h"
 #include "Firestore/core/src/firebase/firestore/model/document_key.h"
 
 @class FIRFirestore;
@@ -26,11 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** Internal FIRDocumentSnapshot API we don't want exposed in our public header files. */
 @interface FIRDocumentSnapshot (Internal)
 
-+ (instancetype)snapshotWithFirestore:(FIRFirestore *)firestore
-                          documentKey:(firebase::firestore::model::DocumentKey)documentKey
-                             document:(nullable FSTDocument *)document
-                            fromCache:(BOOL)fromCache
-                     hasPendingWrites:(BOOL)pendingWrites;
++ (instancetype)snapshotWithSnapshot:(std::unique_ptr<firebase::firestore::api::DocumentSnapshot>)snapshot;
 
 @property(nonatomic, strong, readonly, nullable) FSTDocument *internalDocument;
 
