@@ -330,10 +330,11 @@ static const std::chrono::milliseconds FSTLruGcRegularDelay = std::chrono::minut
     if ([maybeDoc isKindOfClass:[FSTDocument class]]) {
       FSTDocument *document = (FSTDocument *)maybeDoc;
       auto apiResult = absl::make_unique<DocumentSnapshot>(doc.firestore, doc.key, document, true,
-                                                          document.hasLocalMutations);
+                                                           document.hasLocalMutations);
       result = [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiResult)];
     } else if ([maybeDoc isKindOfClass:[FSTDeletedDocument class]]) {
-      auto apiResult = absl::make_unique<DocumentSnapshot>(doc.firestore, doc.key, nil, true, false);
+      auto apiResult =
+          absl::make_unique<DocumentSnapshot>(doc.firestore, doc.key, nil, true, false);
       result = [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiResult)];
     } else {
       error = [NSError errorWithDomain:FIRFirestoreErrorDomain

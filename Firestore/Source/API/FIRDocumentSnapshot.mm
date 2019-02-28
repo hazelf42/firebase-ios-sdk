@@ -96,7 +96,7 @@ ServerTimestampBehavior InternalServerTimestampBehavor(FIRServerTimestampBehavio
   // self class could be FIRDocumentSnapshot or subtype. So we compare with base type explicitly.
   if (![other isKindOfClass:[FIRDocumentSnapshot class]]) return NO;
 
-  const auto& rhs = static_cast<FIRDocumentSnapshot *>(other)->_snapshot;
+  const auto &rhs = static_cast<FIRDocumentSnapshot *>(other)->_snapshot;
   return *_snapshot == *rhs;
 }
 
@@ -134,8 +134,7 @@ ServerTimestampBehavior InternalServerTimestampBehavor(FIRServerTimestampBehavio
 
 - (nullable NSDictionary<NSString *, id> *)dataWithServerTimestampBehavior:
     (FIRServerTimestampBehavior)serverTimestampBehavior {
-  FSTFieldValueOptions *options =
-      [self optionsForServerTimestampBehavior:serverTimestampBehavior];
+  FSTFieldValueOptions *options = [self optionsForServerTimestampBehavior:serverTimestampBehavior];
   FSTObjectValue *data = _snapshot->GetData();
   return data == nil ? nil : [self convertedObject:data options:options];
 }
@@ -146,8 +145,7 @@ ServerTimestampBehavior InternalServerTimestampBehavor(FIRServerTimestampBehavio
 
 - (nullable id)valueForField:(id)field
      serverTimestampBehavior:(FIRServerTimestampBehavior)serverTimestampBehavior {
-  FSTFieldValueOptions *options =
-      [self optionsForServerTimestampBehavior:serverTimestampBehavior];
+  FSTFieldValueOptions *options = [self optionsForServerTimestampBehavior:serverTimestampBehavior];
 
   FIRFieldPath *fieldPath;
   if ([field isKindOfClass:[NSString class]]) {
@@ -225,7 +223,8 @@ ServerTimestampBehavior InternalServerTimestampBehavor(FIRServerTimestampBehavio
 
 @interface FIRQueryDocumentSnapshot ()
 
-- (instancetype)initWithSnapshot:(std::unique_ptr<QueryDocumentSnapshot>)snapshot NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithSnapshot:(std::unique_ptr<QueryDocumentSnapshot>)snapshot
+    NS_DESIGNATED_INITIALIZER;
 
 @end
 

@@ -29,7 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
 /** Internal FIRDocumentSnapshot API we don't want exposed in our public header files. */
 @interface FIRDocumentSnapshot (Internal)
 
-+ (instancetype)snapshotWithSnapshot:(std::unique_ptr<firebase::firestore::api::DocumentSnapshot>)snapshot;
++ (instancetype)snapshotWithSnapshot:
+    (std::unique_ptr<firebase::firestore::api::DocumentSnapshot>)snapshot;
 
 @property(nonatomic, strong, readonly, nullable) FSTDocument *internalDocument;
 

@@ -16,6 +16,8 @@
 
 #import "FIRDocumentChange.h"
 
+#include <utility>
+
 #import "Firestore/Source/API/FIRDocumentSnapshot+Internal.h"
 #import "Firestore/Source/Core/FSTQuery.h"
 #import "Firestore/Source/Core/FSTViewSnapshot.h"

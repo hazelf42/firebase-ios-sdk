@@ -278,7 +278,8 @@ NS_ASSUME_NONNULL_BEGIN
                                 ? snapshot.mutatedKeys.contains(key)
                                 : NO;  // We don't raise `hasPendingWrites` for deleted documents.
 
-    auto apiResult = absl::make_unique<DocumentSnapshot>(firestore, key, document, snapshot.fromCache, hasPendingWrites);
+    auto apiResult = absl::make_unique<DocumentSnapshot>(firestore, key, document,
+                                                         snapshot.fromCache, hasPendingWrites);
     FIRDocumentSnapshot *result = [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiResult)];
     listener(result, nil);
   };

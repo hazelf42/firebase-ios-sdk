@@ -77,9 +77,8 @@ FIRDocumentSnapshot *FSTTestDocSnapshot(const absl::string_view path,
       data ? FSTTestDoc(path, version, data,
                         hasMutations ? FSTDocumentStateLocalMutations : FSTDocumentStateSynced)
            : nil;
-  auto apiResult =
-      absl::make_unique<DocumentSnapshot>(FSTTestFirestore(), testutil::Key(path), doc, fromCache,
-                                          hasMutations);
+  auto apiResult = absl::make_unique<DocumentSnapshot>(FSTTestFirestore(), testutil::Key(path), doc,
+                                                       fromCache, hasMutations);
   return [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiResult)];
 }
 

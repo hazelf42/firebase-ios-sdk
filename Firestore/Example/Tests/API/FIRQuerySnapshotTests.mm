@@ -113,10 +113,12 @@ NS_ASSUME_NONNULL_BEGIN
 
   auto apiDoc1Snap =
       absl::make_unique<QueryDocumentSnapshot>(firestore, doc1New.key, doc1New, false, false);
-  FIRQueryDocumentSnapshot *doc1Snap = [FIRQueryDocumentSnapshot snapshotWithSnapshot:std::move(apiDoc1Snap)];
+  FIRQueryDocumentSnapshot *doc1Snap =
+      [FIRQueryDocumentSnapshot snapshotWithSnapshot:std::move(apiDoc1Snap)];
   auto apiDoc2Snap =
       absl::make_unique<QueryDocumentSnapshot>(firestore, doc2New.key, doc2New, false, false);
-  FIRQueryDocumentSnapshot *doc2Snap = [FIRQueryDocumentSnapshot snapshotWithSnapshot:std::move(apiDoc2Snap)];
+  FIRQueryDocumentSnapshot *doc2Snap =
+      [FIRQueryDocumentSnapshot snapshotWithSnapshot:std::move(apiDoc2Snap)];
 
   NSArray<FIRDocumentChange *> *changesWithoutMetadata = @[
     [[FIRDocumentChange alloc] initWithType:FIRDocumentChangeTypeModified

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#import "Firestore/Source/API/FIRQuerySnapshot+Internal.h"
-
 #include <memory>
 #include <utility>
+
+#import "Firestore/Source/API/FIRQuerySnapshot+Internal.h"
 
 #import "FIRFirestore.h"
 #import "FIRSnapshotMetadata.h"
@@ -137,9 +137,9 @@ NS_ASSUME_NONNULL_BEGIN
 
     NSMutableArray<FIRQueryDocumentSnapshot *> *result = [NSMutableArray array];
     for (FSTDocument *document in documentSet.documentEnumerator) {
-      auto apiResult =
-          absl::make_unique<QueryDocumentSnapshot>(firestore, document.key, document, fromCache,
-                                              self.snapshot.mutatedKeys.contains(document.key));
+      auto apiResult = absl::make_unique<QueryDocumentSnapshot>(
+          firestore, document.key, document, fromCache,
+          self.snapshot.mutatedKeys.contains(document.key));
       [result addObject:[FIRQueryDocumentSnapshot snapshotWithSnapshot:std::move(apiResult)]];
     }
 

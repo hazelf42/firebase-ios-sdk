@@ -119,33 +119,33 @@ NS_ASSUME_NONNULL_BEGIN
          completion:(void (^)(FIRDocumentSnapshot *_Nullable document,
                               NSError *_Nullable error))completion {
   [self validateReference:document];
-  _internalTransaction->Lookup(
-      {document.key}, [self, document, completion](const std::vector<FSTMaybeDocument *> &documents,
+  _internalTransaction->Lookup({document.key}, [self, document, completion](
+                                                   const std::vector<FSTMaybeDocument *> &documents,
                                                    const Status &status) {
-        if (!status.ok()) {
-          completion(nil, MakeNSError(status));
-          return;
-        }
+    if (!status.ok()) {
+      completion(nil, MakeNSError(status));
+      return;
+    }
 
-        HARD_ASSERT(documents.size() == 1, "Mismatch in docs returned from document lookup.");
-        FSTMaybeDocument *internalDoc = documents.front();
-        if ([internalDoc isKindOfClass:[FSTDeletedDocument class]]) {
-          auto apiDoc =
-              absl::make_unique<DocumentSnapshot>(self.firestore, document.key, nil, false, false);
+    HARD_ASSERT(documents.size() == 1, "Mismatch in docs returned from document lookup.");
+    FSTMaybeDocument *internalDoc = documents.front();
+    if ([internalDoc isKindOfClass:[FSTDeletedDocument class]]) {
+      auto apiDoc =
+          absl::make_unique<DocumentSnapshot>(self.firestore, document.key, nil, false, false);
 
-          FIRDocumentSnapshot *doc = [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiDoc)];
-          completion(doc, nil);
-        } else if ([internalDoc isKindOfClass:[FSTDocument class]]) {
-          auto apiDoc =
-              absl::make_unique<DocumentSnapshot>(self.firestore, internalDoc.key, static_cast<FSTDocument*>(internalDoc), false, false);
+      FIRDocumentSnapshot *doc = [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiDoc)];
+      completion(doc, nil);
+    } else if ([internalDoc isKindOfClass:[FSTDocument class]]) {
+      auto apiDoc = absl::make_unique<DocumentSnapshot>(
+          self.firestore, internalDoc.key, static_cast<FSTDocument *>(internalDoc), false, false);
 
-          FIRDocumentSnapshot *doc = [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiDoc)];
-          completion(doc, nil);
-        } else {
-          HARD_FAIL("BatchGetDocumentsRequest returned unexpected document type: %s",
-                    NSStringFromClass([internalDoc class]));
-        }
-      });
+      FIRDocumentSnapshot *doc = [FIRDocumentSnapshot snapshotWithSnapshot:std::move(apiDoc)];
+      completion(doc, nil);
+    } else {
+      HARD_FAIL("BatchGetDocumentsRequest returned unexpected document type: %s",
+                NSStringFromClass([internalDoc class]));
+    }
+  });
 }
 
 - (FIRDocumentSnapshot *_Nullable)getDocument:(FIRDocumentReference *)document

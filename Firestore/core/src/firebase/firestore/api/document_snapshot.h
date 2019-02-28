@@ -89,10 +89,10 @@ class DocumentSnapshot {
 };
 
 class QueryDocumentSnapshot : public DocumentSnapshot {
-  public:
-    using DocumentSnapshot::DocumentSnapshot;
+ public:
+  using DocumentSnapshot::DocumentSnapshot;
 
-    FSTObjectValue* _Nullable GetData() const override;
+  FSTObjectValue* _Nullable GetData() const override;
 };
 
 }  // namespace api
